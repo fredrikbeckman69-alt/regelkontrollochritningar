@@ -1,0 +1,71 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+
+
+model Document {
+  id        String          @id @default(uuid())
+  title     String
+  category  String          // e.g., "examensarbeten", "checklistor"
+  filePath  String          @unique // Original file path
+  mdPath    String          // Extracted markdown file path
+  content   String          // Extracted full text
+  summary   String?         // Short summary
+  keywords  String?         // Comma-separated keywords
+  fileType  String          // "PDF" or "DOCX"
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  images    DocumentImage[]
+}
+
+model DocumentImage {
+  id          String   @id @default(uuid())
+  documentId  String
+  imagePath   String   // e.g., "extracted_images/[docId]/img_[idx].[ext]"
+  description String   // AI-generated text description for search/understanding
+  createdAt   DateTime @default(now())
+  
+  document    Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+}
+
+model UploadedDocument {
+  id                String   @id @default(uuid())
+  customName        String   // User-defined name or original filename
+  originalName      String   // Original uploaded filename
+  filePath          String   // Path on server where the original file is stored (e.g. "uploads/[id].[ext]")
+  fileType          String   // PDF, DOCX, PNG, JPG etc.
+  rawText           String   // Extracted raw text (fallback extraction)
+  reductoMarkdown   String?  // Parsed markdown text from Reducto
+  reductoRawJson    String?  // Raw JSON response string from Reducto
+  complianceStatus  String?  // compliant | warnings | non-compliant
+  complianceSummary String?  // Brief summary of compliance checks
+  complianceChecks  String?  // Stringified JSON list of compliance checks
+  bomJson           String?  // Stringified JSON list of BOM items
+  isNew             Boolean  @default(true)
+  customerNumber    String?
+  salesOrderNumber  String?
+  customerName      String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model GeneratedMacro {
+  id           String   @id @default(uuid())
+  prompt       String?
+  code         String?  // The generated VBA code
+  explanation  String?  // Explanation of the macro
+  fileName     String?  // E.g., 'skapa_skyddsrumsdorr.swb'
+  filePath     String?  // Path on disk, e.g., 'public/macros/uuid_skapa_skyddsrumsdorr.swb'
+  docTitle     String?  // Source document title (for display)
+  status       String   // "pending" | "completed" | "failed"
+  error        String?  // Error details if failed
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
