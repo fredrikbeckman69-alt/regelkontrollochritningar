@@ -46,6 +46,27 @@ with tarfile.open(local_tar, "w:gz") as tar:
             tar.add(path)
 print("Packaging complete: deploy.tar.gz created.")
 
+print("\n--- 1.5. Pushing changes to Git Remote ---")
+import subprocess
+try:
+    remotes = subprocess.check_output(["git", "remote"], stderr=subprocess.STDOUT).decode('utf-8')
+    if "origin" in remotes:
+        print("Git remote 'origin' found. Checking for changes to commit and push...")
+        status = subprocess.check_output(["git", "status", "--porcelain"]).decode('utf-8').strip()
+        if status:
+            print("Uncommitted changes found. Committing automatically...")
+            subprocess.run(["git", "add", "."])
+            subprocess.run(["git", "commit", "-m", "Auto-commit before deploy"])
+        
+        branch = subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"]).decode('utf-8').strip()
+        print(f"Pushing current branch '{branch}' to origin...")
+        subprocess.run(["git", "push", "origin", branch])
+        print("Git push completed successfully.")
+    else:
+        print("No git remote 'origin' configured. Skipping Git push.")
+except Exception as e:
+    print(f"Git operations skipped or failed: {str(e)}")
+
 print("\n--- 2. Connecting to Linux server ---")
 ssh = paramiko.SSHClient()
 ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
