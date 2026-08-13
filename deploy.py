@@ -199,8 +199,9 @@ if caddy_updated:
         f.write(caddy_content)
     sftp_client.close()
     
-    run_ssh(f"mv {temp_caddy} {server_setup_dir}/Caddyfile", use_sudo=True)
-    print("Caddyfile updated on server.")
+    run_ssh(f"cp {temp_caddy} {server_setup_dir}/Caddyfile", use_sudo=True)
+    run_ssh(f"rm {temp_caddy}")
+    print("Caddyfile updated on server (inode preserved).")
     
     # Reload Caddy config gracefully
     print("Reloading Caddy proxy service...")
