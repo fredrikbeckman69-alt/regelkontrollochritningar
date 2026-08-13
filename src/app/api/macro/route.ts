@@ -244,7 +244,8 @@ FÖLJ DESSA REGLER STRÄNGT:
       - 'swUserPreferenceIntegerValue_e.swUnitsMassPropMass' för massenhet (med 'swUnitsMassPropMass_e.swUnitsMassPropMass_Grams' för gram) - OBS: 'swUnitsMass' existerar INTE i swUserPreferenceIntegerValue_e och kommer att ge kompileringsfel!
       - 'swUserPreferenceIntegerValue_e.swUnitsTime' för tidsenhet (med 'swTimeUnit_e.swSecond' för sekund)
 16. Ändra enheter på dokumentnivå: För att ändra enheter för det aktiva dokumentet (swModel av typen ModelDoc2), använd metoden swModel.Extension.SetUserPreferenceInteger (vilken tar tre argument: Preference, Option och Value). Använd ALDRIG swModel.SetUserPreferenceIntegerValue (denna metod existerar inte på ModelDoc2-objektet, vilket triggar kompileringsfelet 'Method or data member not found'). Exempel på korrekt anrop:
-    'swModel.Extension.SetUserPreferenceInteger swUserPreferenceIntegerValue_e.swUnitSystem, swUserPreferenceOption_e.swDetailingNoOptionSpecified, swUnitSystem_e.swUnitSystem_MMGS'`;
+    'swModel.Extension.SetUserPreferenceInteger swUserPreferenceIntegerValue_e.swUnitSystem, swUserPreferenceOption_e.swDetailingNoOptionSpecified, swUnitSystem_e.swUnitSystem_MMGS'
+17. Skapa nya part-dokument utan hårdkodade sökvägar: För att skapa en ny tom part (part-dokument), använd ALLTID 'Set swModel = swApp.NewPart' istället for 'NewDocument' med en hårdkodad sökväg till en '.prtDot'-mall. Detta gör att makrot fungerar oberoende av användarens SOLIDWORKS-version och lokala mall-konfiguration.`;
 
         const userContent = `ANVÄNDARENS INSTRUKTIONER:
 ${prompt || `Generera ett SolidWorks-makro som automatiserar designen eller kontrollen enligt specifikationerna i det bifogade dokumentet.`}
