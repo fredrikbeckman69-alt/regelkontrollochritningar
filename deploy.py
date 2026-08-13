@@ -162,41 +162,37 @@ print("\n--- 7. Registering routing in Caddyfile ---")
 stdin, stdout, stderr = ssh.exec_command(f"cat {server_setup_dir}/Caddyfile")
 caddy_content = stdout.read().decode('utf-8', errors='ignore')
 
-if "regelkontrollochritningar." not in caddy_content:
-    print("Updating Caddyfile with regelkontrollochritningar routing rules...")
-    
-    # If the old autocom routing exists, we replace it to support both.
-    # Otherwise we add it from scratch.
-    if "autocom." in caddy_content:
-        caddy_content = caddy_content.replace(
-            "Host ^autocom\\.",
-            "Host ^(autocom|regelkontrollochritningar)\\."
-        )
-        caddy_content = caddy_content.replace(
-            "http://autocom.192.168.19.13.nip.io, https://autocom.192.168.19.13.nip.io",
-            "http://regelkontrollochritningar.192.168.19.13.nip.io, https://regelkontrollochritningar.192.168.19.13.nip.io, http://autocom.192.168.19.13.nip.io, https://autocom.192.168.19.13.nip.io"
-        )
-    else:
-        caddy_specific = """
-http://regelkontrollochritningar.192.168.19.13.nip.io, https://regelkontrollochritningar.192.168.19.13.nip.io, http://autocom.192.168.19.13.nip.io, https://autocom.192.168.19.13.nip.io {
-    reverse_proxy autocom-app:3000
-}
-"""
-        caddy_handle = """
-    @autocom header_regexp Host ^(autocom|regelkontrollochritningar)\\.
+caddy_updated = False
+
+# 1. Clean up the conflicting standalone block at the bottom
+conflicting_start = "http://regelkontrollochritningar.192.168.19.13.nip.io"
+if conflicting_start in caddy_content:
+    print("Removing conflicting standalone block from Caddyfile...")
+    caddy_content = caddy_content.split(conflicting_start)[0].strip() + "\n"
+    caddy_updated = True
+
+# 2. Check if autocom/regelkontrollochritningar is registered inside http:// block
+if "regelkontrollochritningar.192.168.19.13.nip.io" not in caddy_content and "Host ^(autocom|regelkontrollochritningar)" not in caddy_content:
+    print("Adding regelkontrollochritningar routing to http:// block...")
+    caddy_handle = """
+    @autocom host autocom.192.168.19.13.nip.io regelkontrollochritningar.192.168.19.13.nip.io
     handle @autocom {
         reverse_proxy autocom-app:3000
     }
 """
-        if "handle @bcapi {" in caddy_content:
-            target = """    handle @bcapi {
+    if "handle @bcapi {" in caddy_content:
+        target = """    handle @bcapi {
         reverse_proxy bc-api-app:5000
     }"""
-            replacement = target + "\n\n" + caddy_handle
-            caddy_content = caddy_content.replace(target, replacement, 1)
-        caddy_content += "\n" + caddy_specific + "\n"
+        replacement = target + "\n\n" + caddy_handle
+        caddy_content = caddy_content.replace(target, replacement, 1)
+        caddy_updated = True
+    else:
+        print("Warning: handle @bcapi block not found, could not insert routing automatically.")
 
-    # Save Caddyfile
+# 3. If Caddyfile was updated, upload it and reload Caddy
+if caddy_updated:
+    print("Uploading updated Caddyfile to server...")
     temp_caddy = "/tmp/Caddyfile"
     sftp_client = ssh.open_sftp()
     with sftp_client.open(temp_caddy, "w") as f:
@@ -204,9 +200,13 @@ http://regelkontrollochritningar.192.168.19.13.nip.io, https://regelkontrollochr
     sftp_client.close()
     
     run_ssh(f"mv {temp_caddy} {server_setup_dir}/Caddyfile", use_sudo=True)
-    print("Caddyfile updated.")
+    print("Caddyfile updated on server.")
+    
+    # Reload Caddy config gracefully
+    print("Reloading Caddy proxy service...")
+    run_ssh("docker exec caddy-proxy caddy reload --config /etc/caddy/Caddyfile")
 else:
-    print("regelkontrollochritningar routing is already registered in Caddyfile.")
+    print("Caddyfile routing is already clean and correctly registered.")
 
 print("\n--- 8. Rebuilding and starting Docker container ---")
 # Temporarily stop netdata-monitor to free up 2GB of RAM for the build
