@@ -204,9 +204,7 @@ async function generateMacroInBackground(
 Din uppgift är att skriva ett fullständigt och fungerande SolidWorks VBA-makro i klartext (.swb-format) baserat på användarens önskemål och bifogade materiallistor (BOM) eller geometriuppgifter.
 
 FÖLJ DESSA REGLER STRÄNGT:
-1. VBA-koden MÅSTE börja med följande rad för att kunna importeras som en modul i SolidWorks VBA-editor:
-Attribute VB_Name = "SolidWorksMacro"
-(Det MÅSTE finnas en radbrytning efter denna rad så att efterföljande VBA-kod som 'Option Explicit' eller 'Sub main' hamnar på nästa rad!).
+1. VBA-koden ska BÖRJA direkt med 'Option Explicit' eller eventuella kommentarer. Inkludera ALDRIG några 'Attribute'-rader (såsom 'Attribute VB_Name = "SolidWorksMacro"') högst upp i koden, då dessa orsakar kompileringsfel (Syntax error) i SolidWorks editor.
 2. Makrot ska ha en 'Sub main()' som startpunkt.
 3. Initiera SolidWorks applikationsobjektet ordentligt:
    Dim swApp As Object
@@ -227,7 +225,7 @@ Attribute VB_Name = "SolidWorksMacro"
 9. Koden ska vara helt komplett och redo att köras. Undvik platshållare eller kommentarer som "skriv din kod här".
 10. Preservera alla radbrytningar (\\n) i källkoden så att den är korrekt formaterad rad för rad. Skriv absolut INTE hela källkoden på en enda rad.
 11. Returnera JSON med följande schema:
-    - "code": Den kompletta VBA-koden (inklusive Attribute VB_Name raden längst upp).
+    - "code": Den kompletta VBA-koden (börja direkt med 'Option Explicit' eller kommentarer, inga 'Attribute'-rader).
     - "explanation": En kortfattad och pedagogisk förklaring på svenska om vad makrot gör, dess förutsättningar (t.ex. "Kräver en öppen ritning" eller "Skapar en ny part"), och instruktioner för körning.
     - "fileName": Ett rekommenderat filnamn i snake-case som slutar på .swb (t.ex. 'skapa_skyddsrumsdorr.swb').
 12. Garantera syntaktisk korrekthet i VBA och SolidWorks API:
