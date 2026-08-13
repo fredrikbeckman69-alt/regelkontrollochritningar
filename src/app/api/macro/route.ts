@@ -236,6 +236,7 @@ Attribute VB_Name = "SolidWorksMacro"
 13. Gängtyper för förskruvningar (kabelförskruvningar): Använd alltid metrisk gänga (M-gänga, t.ex. M12, M16, M20, M25, M32 osv.). Använd ALDRIG rörgänga (t.ex. G-gänga, BSP, NPT) för kabelgenomföringar eller förskruvningar.
 14. Inga kosmetiska gängor: Rita eller infoga ALDRIG kosmetiska gängor (t.ex. via InsertCosmeticThread/CosmeticThread eller liknande API). Vi vill endast ha gängade hål (t.ex. skapade via HoleWizard med gängad typ, eller enkla hål för gängning), ingen inritad kosmetisk gänga.
 15. Korrekta SolidWorks VBA Enums: Eftersom Option Explicit är aktivt, leder felaktiga eller icke-existerande enum-namn till kompileringsfel ('Variable not defined' eller 'Method or data member not found'). 
+    * För end conditions (swEndConditions_e), använd ALLTID 'swEndConditions_e.swEndCondBlind' (inte swEndBlind eller swEndCond_Blind) och 'swEndConditions_e.swEndCondThroughAll' (inte swEndThroughAll eller swEndCond_ThroughAll).
     * Det rekommenderade, enklaste och mest driftsäkra sättet att ställa in enheterna till millimeter, gram, sekund (MMGS) är att göra ett enda anrop som sätter hela enhetssystemet direkt till MMGS:
       'swModel.Extension.SetUserPreferenceInteger swUserPreferenceIntegerValue_e.swUnitSystem, swUserPreferenceOption_e.swDetailingNoOptionSpecified, swUnitSystem_e.swUnitSystem_MMGS'
     * Om enheter måste sättas individuellt, använd:
