@@ -402,7 +402,9 @@ export default function CompliancePage() {
 
   const copyMacroToClipboard = () => {
     if (!macroResult) return;
-    navigator.clipboard.writeText(macroResult.code);
+    // Strip Attribute lines which cause syntax errors when pasted directly into VBA editor window
+    const cleanCode = macroResult.code.replace(/^Attribute VB_Name\s*=\s*"[^"]*"\r?\n/gi, '');
+    navigator.clipboard.writeText(cleanCode);
     setMacroCopied(true);
     setTimeout(() => setMacroCopied(false), 2000);
   };

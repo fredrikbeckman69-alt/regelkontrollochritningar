@@ -302,7 +302,9 @@ export default function MacroGeneratorPage() {
 
   const copyToClipboard = () => {
     if (!result || !result.code) return;
-    navigator.clipboard.writeText(result.code);
+    // Strip Attribute lines which cause syntax errors when pasted directly into VBA editor window
+    const cleanCode = result.code.replace(/^Attribute VB_Name\s*=\s*"[^"]*"\r?\n/gi, '');
+    navigator.clipboard.writeText(cleanCode);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
