@@ -216,8 +216,8 @@ Attribute VB_Name = "SolidWorksMacro"
    Set swModel = swApp.ActiveDoc
 5. Inkludera alltid felhantering (t.ex. 'If swModel Is Nothing Then') för att förhindra krascher om inget dokument är öppet när makrot kräver det.
 6. Vid geometrisk ritning av skyddsrumskomponenter, använd korrekta SolidWorks API-metoder:
-   - Skissa cirklar, linjer och rektanglar via 'swModel.SketchManager.CreateCircle', 'CreateLine2', etc.
-   - Skapa extruderade baser/snitt via 'swModel.FeatureManager.FeatureExtrusion3' eller 'FeatureCut4'.
+    - Skissa cirklar och linjer via 'swModel.SketchManager.CreateCircle', 'CreateLine2', etc. Skissa rektanglar via 'swModel.SketchManager.CreateRectangle' som tar exakt 6 parametrar (X1, Y1, Z1, X2, Y2, Z2) för diagonalens hörn. Lägg ALDRIG till en sjunde parameter.
+    - Skapa extruderade baser/snitt via 'swModel.FeatureManager.FeatureExtrusion3' eller 'FeatureCut4'.
    - Använd standardiserade materialkvaliteter i kommentarerna och koden om tillämpligt (t.ex. stål 'S355JR' or 'S235JR').
 7. Lägg alltid till anpassade egenskaper (Custom Properties) för kvalitetssäkring i det genererat makrot om det skapar eller modifierar en part/sammanställning:
    - 'swModel.DeleteCustomInfo2 "", "RitadAv"' (rensa om den finns)
